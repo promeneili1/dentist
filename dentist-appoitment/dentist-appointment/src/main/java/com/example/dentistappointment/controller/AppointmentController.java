@@ -7,9 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/appointments")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
@@ -17,6 +20,20 @@ public class AppointmentController {
     @Autowired
     public AppointmentController(AppointmentService appointmentService) {
         this.appointmentService = appointmentService;
+    }
+
+
+
+    @PostMapping("/login")
+    public ResponseEntity<Void> login(@RequestBody Map<String, String> body) {
+        String jmbg = body.get("jmbg");
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/patient/{jmbg}")
+    public ResponseEntity<List<Appointment>> getAppointmentsByJMBG(@PathVariable String jmbg) {
+        List<Appointment> appointments = appointmentService.getAppointmentsByJMBG(jmbg);
+        return ResponseEntity.ok(appointments);
     }
 
     @GetMapping
@@ -32,16 +49,14 @@ public class AppointmentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/patient/{patientJMBG}")
-    public ResponseEntity<List<Appointment>> getAppointmentsByPatientJMBG(@PathVariable String patientJMBG) {
-        List<Appointment> appointments = appointmentService.findAppointmentsByPatientJMBG(patientJMBG);
-        return ResponseEntity.ok(appointments);
-    }
-
     @PostMapping
-    public ResponseEntity<Appointment> createAppointment(@RequestBody Appointment appointment) {
-        Appointment createdAppointment = appointmentService.saveAppointment(appointment);
-        return ResponseEntity.ok(createdAppointment);
+    public ResponseEntity<?> createAppointment(@RequestBody Appointment appointment) {
+        try {
+            Appointment createdAppointment = appointmentService.saveAppointment(appointment);
+            return ResponseEntity.ok(createdAppointment);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -51,8 +66,12 @@ public class AppointmentController {
     }
 
     @DeleteMapping("/cancel/{id}")
-    public ResponseEntity<Void> cancelAppointment(@PathVariable Long id) {
-        appointmentService.cancelAppointment(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> cancelAppointment(@PathVariable Long id) {
+        try {
+            appointmentService.cancelAppointment(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/patients")
+@CrossOrigin(origins = "http://localhost:4200")
 public class PatientController {
 
     private final PatientService patientService;
@@ -25,6 +26,14 @@ public class PatientController {
         Optional<Patient> patient = patientService.findPatientById(id);
         return patient.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/jmbg/{jmbg}")
+    public ResponseEntity<Patient> findPatientByJmbg(@PathVariable String jmbg) {
+        Optional<Patient> patient = patientService.findPatientByJMBG(jmbg);
+        return patient.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
 
     @PostMapping
     public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {

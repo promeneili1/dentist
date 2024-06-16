@@ -26,7 +26,6 @@ public class PatientService {
     public Optional<Patient> findPatientByJMBG(String jmbg) {
         return patientRepository.findByJMBG(jmbg);
     }
-
     public Patient savePatient(Patient patient) {
         return patientRepository.save(patient);
     }
