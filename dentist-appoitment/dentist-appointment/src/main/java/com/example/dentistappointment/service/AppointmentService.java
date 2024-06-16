@@ -45,9 +45,9 @@ public class AppointmentService {
         return appointmentRepository.findAll();
     }
 
-    public List<Appointment> findAppointmentsByPatientId(String patientId) {
+    /*public List<Appointment> findAppointmentsByPatientId(String patientId) {
         return appointmentRepository.findByPatientId(patientId);
-    }
+    }*/
 
     public List<Appointment> findAppointmentsByStartTimeBetween(LocalDateTime start, LocalDateTime end) {
         return appointmentRepository.findByStartTimeBetween(start, end);

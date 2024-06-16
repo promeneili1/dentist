@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     List<Appointment> findByPatientJMBG(String patientJMBG);
-    List<Appointment> findByPatientId(String patientId);
+    /*List<Appointment> findByPatientId(String id);*/
 
     List<Appointment> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
 }

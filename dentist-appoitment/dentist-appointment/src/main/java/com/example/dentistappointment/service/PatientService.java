@@ -6,6 +6,7 @@ import com.example.dentistappointment.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,6 +24,9 @@ public class PatientService {
         return patientRepository.findById(id);
     }
 
+    public List<Patient> getAllPatients() {
+        return patientRepository.findAll();
+    }
     public Optional<Patient> findPatientByJMBG(String jmbg) {
         return patientRepository.findByJMBG(jmbg);
     }
