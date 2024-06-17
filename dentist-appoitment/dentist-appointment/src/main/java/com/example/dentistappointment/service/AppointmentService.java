@@ -41,6 +41,25 @@ public class AppointmentService {
         return appointmentRepository.findByPatientJMBG(patientJMBG);
     }
 
+    public boolean isOverlappingAppointment(Appointment appointment) {
+        LocalDateTime startOfDay = appointment.getStartTime().toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
+
+        List<Appointment> appointmentsForDay = appointmentRepository.findByStartTimeBetween(startOfDay, endOfDay);
+
+        for (Appointment existingAppointment : appointmentsForDay) {
+            if (appointmentsOverlap(existingAppointment, appointment)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean appointmentsOverlap(Appointment a1, Appointment a2) {
+        return a1.getStartTime().isBefore(a2.getEndTime()) && a1.getEndTime().isAfter(a2.getStartTime());
+    }
+
+
     public List<Appointment> findAllAppointments() {
         return appointmentRepository.findAll();
     }
@@ -62,8 +81,17 @@ public class AppointmentService {
         if (!isValidAppointmentDuration(appointment.getStartTime(), appointment.getEndTime())) {
             throw new IllegalArgumentException("Appointment duration must be either 30 or 60 minutes.");
         }
+        // Validacija preklapanja termina
+        if (isOverlappingAppointment(appointment)) {
+            throw new IllegalArgumentException("Appointment time overlaps with an existing appointment.");
+        }
         return appointmentRepository.save(appointment);
     }
+
+
+
+
+
 
     public boolean isValidAppointmentTime(LocalDateTime startTime) {
         LocalTime truncated = startTime.toLocalTime().truncatedTo(ChronoUnit.MINUTES);
