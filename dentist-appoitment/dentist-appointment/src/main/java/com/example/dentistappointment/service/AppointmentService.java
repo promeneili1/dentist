@@ -1,7 +1,9 @@
 package com.example.dentistappointment.service;
 
 import com.example.dentistappointment.model.Appointment;
+import com.example.dentistappointment.model.Patient;
 import com.example.dentistappointment.repository.AppointmentRepository;
+import com.example.dentistappointment.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
 
+    private final PatientRepository patientRepository;
+
 
     @Value("${appointment.cancellation.deadline.hours:24}")
     private int cancellationDeadlineHours;
@@ -26,12 +30,21 @@ public class AppointmentService {
 
 
     @Autowired
-    public AppointmentService(AppointmentRepository appointmentRepository) {
+    public AppointmentService(AppointmentRepository appointmentRepository, PatientRepository patientRepository) {
         this.appointmentRepository = appointmentRepository;
+        this.patientRepository = patientRepository;
     }
 
     public List<Appointment> getAppointmentsByJMBG(String jmbg) {
         return appointmentRepository.findByPatientJMBG(jmbg);
+    }
+
+    public Appointment createAppointmentForDentist(Appointment appointment) throws Exception {
+        Optional<Patient> patient = patientRepository.findByJMBG(appointment.getPatientJMBG());
+        if (!patient.isPresent()) {
+            throw new Exception("Patient with JMBG " + appointment.getPatientJMBG() + " not found.");
+        }
+        return appointmentRepository.save(appointment);
     }
 
     public Optional<Appointment> findAppointmentById(Long id) {
@@ -65,24 +78,22 @@ public class AppointmentService {
         return appointmentRepository.findAll();
     }
 
-    /*public List<Appointment> findAppointmentsByPatientId(String patientId) {
-        return appointmentRepository.findByPatientId(patientId);
-    }*/
+
 
     public List<Appointment> findAppointmentsByStartTimeBetween(LocalDateTime start, LocalDateTime end) {
         return appointmentRepository.findByStartTimeBetween(start, end);
     }
 
     public Appointment saveAppointment(Appointment appointment) {
-        // Validacija termina: mora biti na pun sat ili pola sata
+
         if (!isValidAppointmentTime(appointment.getStartTime())) {
             throw new IllegalArgumentException("Appointment must be on the hour or half-hour.");
         }
-        // Validacija dužine termina
+
         if (!isValidAppointmentDuration(appointment.getStartTime(), appointment.getEndTime())) {
             throw new IllegalArgumentException("Appointment duration must be either 30 or 60 minutes.");
         }
-        // Validacija preklapanja termina
+
         if (isOverlappingAppointment(appointment)) {
             throw new IllegalArgumentException("Appointment time overlaps with an existing appointment.");
         }

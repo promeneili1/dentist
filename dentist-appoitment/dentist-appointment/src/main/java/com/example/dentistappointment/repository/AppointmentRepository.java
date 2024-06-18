@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     List<Appointment> findByPatientJMBG(String patientJMBG);
-    /*List<Appointment> findByPatientId(String id);*/
+
     @Query("SELECT a FROM Appointment a WHERE (:startTime BETWEEN a.startTime AND a.endTime OR :endTime BETWEEN a.startTime AND a.endTime)")
     List<Appointment> findOverlappingAppointments(LocalDateTime startTime, LocalDateTime endTime);
 

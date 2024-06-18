@@ -54,6 +54,13 @@ public class DentistController {
         return patientOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/patients/{jmbg}")
+    public ResponseEntity<Patient> getPatientByJMBG(@PathVariable String jmbg) {
+        Optional<Patient> patientOptional = dentistService.getPatientByJmbg(jmbg);
+        return patientOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
 
     @GetMapping("/appointments")
     public ResponseEntity<List<Appointment>> getAllAppointments() {

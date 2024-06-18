@@ -1,8 +1,11 @@
 package com.example.dentistappointment.controller;
 
 import com.example.dentistappointment.model.Appointment;
+import com.example.dentistappointment.model.Patient;
 import com.example.dentistappointment.service.AppointmentService;
+import com.example.dentistappointment.service.DentistService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +20,12 @@ import java.util.Optional;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+    private final DentistService dentistService;
 
     @Autowired
-    public AppointmentController(AppointmentService appointmentService) {
+    public AppointmentController(AppointmentService appointmentService, DentistService dentistService) {
         this.appointmentService = appointmentService;
+        this.dentistService = dentistService;
     }
 
 
@@ -56,6 +61,30 @@ public class AppointmentController {
         return ResponseEntity.ok(appointments);
     }
 
+    @PostMapping("/dentist")
+    public ResponseEntity<?> createAppointmentForDentist(@RequestBody Appointment appointment) {
+        try {
+            Appointment createdAppointment = appointmentService.createAppointmentForDentist(appointment);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdAppointment);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/by-jmbg")
+    public ResponseEntity<Appointment> createAppointmentByJMBG(@RequestParam String jmbg, @RequestBody Appointment appointment) {
+        Optional<Patient> patientOptional = dentistService.getPatientByJmbg(jmbg);
+        if (patientOptional.isPresent()) {
+            appointment.setPatientJMBG(jmbg);
+            Appointment createdAppointment = dentistService.saveAppointment(appointment);
+            return ResponseEntity.ok(createdAppointment);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+
+
     @GetMapping("/weekly-appointments")
     public ResponseEntity<List<Appointment>> getWeeklyAppointments(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate) {
         List<Appointment> appointments = appointmentService.findAppointmentsBetweenDates(startDate, endDate);
@@ -71,6 +100,8 @@ public class AppointmentController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+
 
 
 

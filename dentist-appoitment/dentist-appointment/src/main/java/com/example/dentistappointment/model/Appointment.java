@@ -25,14 +25,11 @@ public class Appointment {
     @Column(nullable = false)
     private LocalDateTime endTime;
 
-    /*@Column(nullable = false)
-    private String patientId;*/
+
 
     @Column(nullable = false)
     private String patientJMBG;
 
 
-    /*@Column(nullable = false)
-    private String patientName;
-}*/
+
 }

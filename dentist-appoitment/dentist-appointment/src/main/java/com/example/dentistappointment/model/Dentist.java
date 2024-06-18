@@ -22,7 +22,7 @@ public class Dentist {
     private String name;
 
     @Column(nullable = false)
-    private String password; // Šifra za prijavu
+    private String password;
 
 
 
