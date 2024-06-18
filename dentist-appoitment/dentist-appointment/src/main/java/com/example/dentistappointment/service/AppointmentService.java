@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -109,6 +110,9 @@ public class AppointmentService {
     }
 
     public void deleteAppointment(Long id) {
+        if (!appointmentRepository.existsById(id)) {
+            throw new IllegalArgumentException("Appointment not found with id " + id);
+        }
         appointmentRepository.deleteById(id);
     }
 
@@ -124,4 +128,24 @@ public class AppointmentService {
             throw new IllegalArgumentException("Appointment not found.");
         }
     }
+
+    public List<Appointment> findAppointmentsByDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusHours(23).plusMinutes(59).plusSeconds(59);
+        return appointmentRepository.findByStartTimeBetween(startOfDay, endOfDay);
+    }
+
+    public List<Appointment> findAppointmentsBetweenDates(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startOfDay = startDate.atStartOfDay();
+        LocalDateTime endOfDay = endDate.atTime(23, 59, 59);
+        return appointmentRepository.findByStartTimeBetween(startOfDay, endOfDay);
+    }
+
+
+
+    public boolean isAppointmentAvailable(LocalDateTime startTime, LocalDateTime endTime) {
+        List<Appointment> overlappingAppointments = appointmentRepository.findOverlappingAppointments(startTime, endTime);
+        return overlappingAppointments.isEmpty();
+    }
+
 }
